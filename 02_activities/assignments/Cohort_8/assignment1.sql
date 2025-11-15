@@ -86,7 +86,11 @@ SELECT
     CASE
         WHEN product_qty_type = 'unit' THEN 'unit'
         ELSE 'bulk'
-    END AS prod_qty_type_condensed
+    END AS prod_qty_type_condensed,
+    CASE
+        WHEN LOWER(product_name) LIKE '%pepper%' THEN 1
+        ELSE 0
+    END AS pepper_flag
 FROM product;
 
 
@@ -111,10 +115,6 @@ ORDER BY
 
 
 
-
-
-
-
 /* SECTION 3 */
 
 -- AGGREGATE
@@ -126,9 +126,6 @@ SELECT
     COUNT(*) AS booth_rental_count
 FROM vendor_booth_assignments
 GROUP BY vendor_id;
-
-
-
 
 
 
@@ -174,7 +171,7 @@ AS SELECT * FROM vendor;
 
 INSERT INTO temp.new_vender
 VALUES
-(10, 'Thomass Superfood Store', 'Fresh Focused', 'Thomas Rosenthal', 'Thom Rosenhal'); 
+(10, 'Superfood Store', 'Fresh Focused', 'Thomas Rosenthal', 'Thom Rosenhal'); 
 
 
 -> To insert the new row use VALUES, specifying the value you want for each column:
@@ -206,7 +203,7 @@ SELECT
     customer_id,
     SUM(quantity * cost_to_customer_per_qty) AS total_spent
 FROM customer_purchases
-WHERE strftime('%m', market_date) = '04'
+WHERE strftime('%m', market_date) = '07'
   AND strftime('%Y', market_date) = '2022'
 GROUP BY customer_id;
 
