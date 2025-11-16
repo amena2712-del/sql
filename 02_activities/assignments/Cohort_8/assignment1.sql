@@ -109,7 +109,7 @@ INNER JOIN vendor_booth_assignments
     ON vendor.vendor_id = vendor_booth_assignments.vendor_id
 ORDER BY
     vendor.vendor_name,
-    vendor_booth_assignments.market_date;
+    vendor_booth_assignments.market_date DESC;
 
 
 
@@ -171,7 +171,7 @@ AS SELECT * FROM vendor;
 
 INSERT INTO temp.new_vender
 VALUES
-(10, 'Superfood Store', 'Fresh Focused', 'Thomas Rosenthal', 'Thom Rosenhal'); 
+(10, 'Thom Rosenhal', 'super store', 'Thom' ,' Rosenhal'); 
 
 
 -> To insert the new row use VALUES, specifying the value you want for each column:
