@@ -173,6 +173,8 @@ SELECT
 /* 1. Find the most and least expensive product by vendor with UNION (and row_number!) */
 
 </sql><sql name="FULL_OUTER_JOIN_UNION">/* MODULE 4 */
+
+
 /* UNION */
 
 /* 1. Emulate a FULL OUTER JOIN with a UNION */
@@ -200,9 +202,120 @@ INSERT INTO temp.store2
 VALUES(&quot;tiger&quot;,2),
 	(&quot;dancer&quot;,7),
 	(&quot;superhero&quot;, 5);</sql><sql name="INTERSECT_EXCEPT">/* MODULE 4 */
+	
+	
+	
+	
+	
+	
+	
+	/* 1. Emulate a FULL OUTER JOIN with a UNION */
+DROP TABLE IF EXISTS temp.store1; 
+CREATE TEMP TABLE IF NOT EXISTS temp.store1
+(
+costume TEXT,
+quantity INT
+);
+
+INSERT INTO temp.store1
+VALUES("tiger",6),
+        ("elephant",2),
+        ("princess", 4);
+
+
+DROP TABLE IF EXISTS temp.store2;
+CREATE TEMP TABLE IF NOT EXISTS temp.store2
+(
+costume TEXT,
+quantity INT
+);
+
+INSERT INTO temp.store2
+VALUES("tiger",2),
+	("dancer",7),
+	("superhero", 5);
+	
+SELECT s1.costume, s1.quantity as store1_quantity, s2.quantity as store2_quantity, 'top query' as location
+FROM store1 s1
+LEFT JOIN store2 s2
+	ON s1.costume = s2.costume
+
+UNION ALL -- allow for duplicates, because a FULL OUTER join would ALSO allow for duplicates
+
+SELECT s2.costume, s1.quantity, s2.quantity, 'bottom query'
+FROM store2 s2
+LEFT JOIN store1 s1
+	ON s1.costume = s2.costume
+WHERE s1.costume IS NULL
+
+	
+	
+	
+	
+	
+/* MODULE 4 */
+/* INTERSECT & EXCEPT */
+
+/* 1. Find products that have been sold (e.g. are in customer purchases AND product) */ 
+SELECT product_id
+FROM product
+INTERSECT
+SELECT product_id
+FROM customer_purchases;
+
+
+/* 2. Find products that have NOT been sold (e.g. are NOT in customer purchases even though in product) */
+SELECT product_name, x.product_id
+
+FROM (
+	SELECT product_id
+	FROM product
+	EXCEPT
+	SELECT product_id
+	FROM customer_purchases
+) x
+INNER JOIN product p on x.product_id = p.product_id;
+
+/* 3. Directions matter... if we switch the order here:
+products that do not exist, because no products purchased are NOT in the product table (e.g. are NOT in product even though in customer purchases)*/
+
+SELECT product_id
+FROM customer_purchases
+EXCEPT
+SELECT product_id
+FROM product;
+
+
+/* 4. We can remake the intersect with a WHERE subquery for more details ...  */
+
+SELECT * FROM product
+WHERE product_id IN (
+	SELECT product_id
+	FROM product
+	INTERSECT
+	SELECT product_id
+	FROM customer_purchases
+)
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 /* INTERSECT &amp; EXCEPT */
 
 /* 1. Find products that have been sold (e.g. are in customer purchases AND product) */ 
+
+
+
 
 
 
@@ -210,8 +323,18 @@ VALUES(&quot;tiger&quot;,2),
 
 
 
+
+
+
+
 /* 3. Directions matter... if we switch the order here:
 products that do not exist, because no products purchased are NOT in the product table (e.g. are NOT in product even though in customer purchases)*/
+
+
+
+
+
+
 
 
 
