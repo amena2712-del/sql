@@ -9,7 +9,7 @@ Using the following syntax you create our super cool and not at all needy manage
 
 SELECT 
 product_name || ', ' || product_size|| ' (' || product_qty_type || ')'
-FROM product
+FROM producti
 
 
 But wait! The product table has some bad data (a few NULL values). 
