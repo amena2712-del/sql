@@ -38,7 +38,6 @@ each new market date for each customer, or select only the unique market dates p
 (without purchase details) and number those visits. 
 HINT: One of these approaches uses ROW_NUMBER() and one uses DENSE_RANK(). */
 
-
 SELECT
     customer_id,
     market_date,
@@ -98,12 +97,12 @@ WHERE visit_number = 1;    --/ *newest vist
 /* 3. Using a COUNT() window function, include a value along with each row of the 
 customer_purchases table that indicates how many different times that customer has purchased that product_id. */
 
-SELECT 
-    customer_id,
-    product_id,
-    market_date,
-    COUNT(product_id) OVER (PARTITION BY customer_id, product_id) AS product_purchase_count         --/* customer_id, product_id: This creates a "window" for every unique combination of customer and product and count (..) the number of the row
-FROM customer_purchases;
+
+SELECT customer_purchases.*,
+COUNT(product_id) OVER (PARTITION BY customer_id, product_id) AS
+product_purchase_count
+FROM customer_purchases 
+ORDER BY customer_id, product_id, market_date
 
 
 
@@ -226,6 +225,7 @@ ORDER BY
     p.product_name;
 
 
+-----------------------------------**
 
 -- INSERT
 /*1.  Create a new table "product_units". .
@@ -234,10 +234,14 @@ It should use all of the columns from the product table, as well as a new column
 Name the timestamp column `snapshot_timestamp`. */
 
 -- Drop the table if it already exists -prevents errors
-DROP TABLE IF EXISTS product_units;
+--DROP TABLE IF EXISTS product_units;
+
+DROP TABLE  IF EXISTS temp.product_units ;
+
 
 -- 1. Create the product_units table
-CREATE TABLE product_units AS
+
+CREATE TABLE temp.product_units AS
 
 SELECT
     *,
@@ -248,7 +252,7 @@ WHERE product_qty_type = 'unit';
 /*2. Using `INSERT`, add a new row to the product_units table (with an updated timestamp). 
 This can be any product you desire (e.g. add another record for Apple Pie).. */
 
-INSERT INTO product_units (
+INSERT INTO temp.product_units (
     product_id,
     product_name,
     product_size,
@@ -265,23 +269,21 @@ VALUES (
 
 --Check only the inserted row
 SELECT *
-FROM product_units
-WHERE product_id = 100000;
---Check all Apple Pie rows
-SELECT *
-FROM product_units
-WHERE product_name = 'Apple Pie';
+FROM temp.product_units
+
+WHERE product_name = 'Apple Pie'
+ORDER by snapshot_timestamp;
 
 
 -- DELETE
 /* 1. Delete the older record for the whatever product you added. 
 HINT: If you don't specify a WHERE clause, you are going to have a bad time.*/
 
-DELETE FROM product_units
+DELETE FROM temp.product_units
 WHERE product_id = 100000
 AND snapshot_timestamp = (
     SELECT MIN(snapshot_timestamp)
-    FROM product_units
+    FROM temp.product_units
     WHERE product_id = 100000
 );
 
@@ -306,15 +308,17 @@ When you have all of these components, you can run the update statement. */
 
 
 --// 1. Add the new column to the product table
-ALTER TABLE product
+
+ALTER TABLE temp.product_units
 ADD current_quantity INT;
 
+
 -- 2. Update current_quantity with the last quantity per product
-UPDATE product
+UPDATE temp.product_units
 SET current_quantity = (
     SELECT COALESCE(quantity, 0)
     FROM vendor_inventory vi
-    WHERE vi.product_id = product.product_id
+    WHERE vi.product_id = temp.product_units.product_id
     ORDER BY vi.market_date DESC
     LIMIT 1
 )
@@ -327,6 +331,18 @@ WHERE product_id IN (
 SELECT       
     product_id,
     product_name,
-    current_quantity
-FROM product
+	product_size,
+    current_quantity,
+	product_qty_type
+FROM temp.product_units
 ORDER BY product_id;
+
+
+
+
+
+
+
+
+
+
